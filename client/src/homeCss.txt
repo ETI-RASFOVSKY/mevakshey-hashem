@@ -1,0 +1,70 @@
+.nav-links {
+  display: flex;
+  gap: 2px; /* זה בערך 1 ס"מ ברוב המסכים */
+}
+
+/* ניווט (nav) - עליון יותר מהתמונה */
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px; /* רווח קטן בין הקישורים – בערך סנטימטר */
+  z-index: 1;
+  position: relative;
+  background-color: white;
+  flex-wrap: wrap; /* שומר על מסך קטן */
+}
+
+/* קישורים */
+nav a {
+  text-decoration: none;
+  font-size: 16px;
+  color: #333;
+  padding: 8px 12px;
+  border-radius: 5px;
+  border: 1px solid rgb(0, 0, 0);
+  white-space: nowrap; /* לא ירד שורה */
+  height: fit-content;
+}
+
+/* אפקט רחף */
+nav a:hover {
+  border: 1px solid hsl(51, 100%, 50%);
+  background-color: transparent;
+}
+
+/* הלוגו */
+nav img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     {/* כאן זה רק אפשרות למנהל */}
+        <div>
+          <div>
+            <label>כותרת: </label>
+            <textarea rows="1" cols="50" />{" "}
+          </div>
+          <label>תוכן: </label>
+          <textarea rows="4" cols="50" />{" "}
+        </div>
+<button onClick={handleSendEmails}>שלח</button>
+        {/* עד כאן */}

@@ -1,0 +1,21 @@
+{
+  "name": "vaad",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+  "dev": "concurrently \"npm run dev --prefix server\" \"npm start --prefix client\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.53.0",
+    "bcrypt": "^6.0.0",
+    "multer": "^2.0.2",
+    "nodemailer": "^7.0.5"
+  }
+}

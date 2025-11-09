@@ -1,0 +1,74 @@
+.formContainer {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  z-index: 1000;
+  background-color: rgba(255, 255, 255, 0.2); /* רקע שקוף מאוד */
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 153, 153, 0.2); /* טורקיז בהיר ושקוף */
+  padding: 12px 14px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  direction: rtl;
+  font-family: "Segoe UI", sans-serif;
+  width: 220px;
+}
+
+.formTitle {
+  color: #004d4d;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.formFields label {
+  display: block;
+  color: #004d4d;
+  font-size: 0.8rem;
+  margin-bottom: 2px;
+}
+
+.formFields input {
+  width: 90%;
+  padding: 5px 7px;
+  margin-bottom: 8px;
+  border: 1px solid #009999;
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.3);
+  font-size: 0.85rem;
+  color: #222;
+}
+
+.formFields input:focus {
+  border-color: #d4af37;
+  outline: none;
+}
+
+.sendEmail {
+  background-color: #009999;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+}
+
+.sendEmail:hover {
+  background-color: #007979;
+}
+
+.successMessage {
+  color: #006666;
+  margin-top: 8px;
+  text-align: center;
+  font-size: 0.8rem;
+}
+.errorMessage {
+  color: #c0392b; /* אדום עדין */
+  font-size: 0.7rem;
+  margin-bottom: 4px;
+}
