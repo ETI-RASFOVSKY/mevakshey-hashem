@@ -1,11 +1,41 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const supabase = require("../services/supabaseService");
 
-const ADMIN_HASH = process.env.ADMIN_HASH;
+const ENV_ADMIN_HASH = process.env.ADMIN_HASH;
 const JWT_SECRET = process.env.JWT_SECRET;
 
 if (!JWT_SECRET) {
   throw new Error('JWT_SECRET is required in environment variables');
+}
+
+async function getAdminHash() {
+  // עדיפות למסד נתונים כדי לאפשר ניהול דינמי
+  try {
+    const { data, error } = await supabase
+      .from("admins")
+      .select("passwordhash")
+      .eq("role", "admin")
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error reading admin hash from DB:", error);
+    }
+
+    if (data && data.passwordhash) {
+      return data.passwordhash;
+    }
+  } catch (err) {
+    console.error("Unexpected error fetching admin hash:", err);
+  }
+
+  // fallback ל-ENV לצורך תאימות לאחור
+  if (ENV_ADMIN_HASH) {
+    return ENV_ADMIN_HASH;
+  }
+
+  return null;
 }
 
 exports.loginAdmin = async (req, res) => {
@@ -17,12 +47,13 @@ exports.loginAdmin = async (req, res) => {
       return res.status(400).json({ error: "סיסמה נדרשת" });
     }
 
-    if (!ADMIN_HASH) {
-      return res.status(500).json({ error: "הגדרות שרת לא תקינות" });
+    const adminHash = await getAdminHash();
+    if (!adminHash) {
+      return res.status(500).json({ error: "סיסמת המנהל לא הוגדרה" });
     }
 
     // בדיקה אם הסיסמה נכונה
-    const match = await bcrypt.compare(password, ADMIN_HASH);
+    const match = await bcrypt.compare(password, adminHash);
     if (!match) {
       return res.status(401).json({ error: "סיסמה לא נכונה" });
     }

@@ -1,6 +1,51 @@
 const supabase = require("../services/supabaseService");
 const { sendWelcomeEmail } = require("./emailController");
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+async function createUserRecord({ fname, Email }) {
+  if (!fname || !Email) {
+    const error = new Error("שם פרטי ומייל נדרשים");
+    error.status = 400;
+    throw error;
+  }
+
+  if (!emailRegex.test(Email)) {
+    const error = new Error("פורמט מייל לא תקין");
+    error.status = 400;
+    throw error;
+  }
+
+  const { data, error } = await supabase
+    .from("users")
+    .insert([{ fname, Email }])
+    .select();
+
+  if (error) {
+    console.error("Error adding user:", error);
+
+    // טיפול בשגיאה של כפילות (unique violation)
+    if (error.code === "23505") {
+      const dupError = new Error("מייל זה כבר רשום במערכת");
+      dupError.status = 409;
+      throw dupError;
+    }
+
+    throw error;
+  }
+
+  const newUser = data[0];
+
+  // שליחת מייל ברכה (לא חוסם אם נכשל)
+  try {
+    await sendWelcomeEmail(Email, fname);
+  } catch (emailError) {
+    console.warn("Failed to send welcome email:", emailError);
+  }
+
+  return newUser;
+}
+
 // שליפת כל המשתמשים
 exports.getAllUsers = async (req, res) => {
   try {
@@ -16,44 +61,25 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-// הוספת משתמש
+// הוספת משתמש (למנהל)
 exports.addUser = async (req, res) => {
   try {
-    const { fname, Email } = req.body;
-
-    // Validation
-    if (!fname || !Email) {
-      return res.status(400).json({ error: "שם פרטי ומייל נדרשים" });
-    }
-
-    // בדיקת פורמט מייל בסיסי
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(Email)) {
-      return res.status(400).json({ error: "פורמט מייל לא תקין" });
-    }
-
-    const { data, error } = await supabase
-      .from("users")
-      .insert([{ fname, Email }])
-      .select();
-    
-    if (error) {
-      console.error("Error adding user:", error);
-      return res.status(500).json({ error: error.message });
-    }
-    
-    // שליחת מייל ברכה (לא חוסם אם נכשל)
-    try {
-      await sendWelcomeEmail(Email, fname);
-    } catch (emailError) {
-      console.warn("Failed to send welcome email:", emailError);
-      // ממשיכים גם אם שליחת המייל נכשלה
-    }
-    
-    res.status(201).json(data[0]);
+    const user = await createUserRecord(req.body);
+    res.status(201).json(user);
   } catch (err) {
     console.error("Unexpected error in addUser:", err);
-    res.status(500).json({ error: "שגיאה בשרת" });
+    res.status(err.status || 500).json({ error: err.message || "שגיאה בשרת" });
+  }
+};
+
+// רישום משתמש על ידי הציבור (ללא צורך במנהל)
+exports.publicSubscribe = async (req, res) => {
+  try {
+    const user = await createUserRecord(req.body);
+    res.status(201).json({ message: "נרשמת בהצלחה", user });
+  } catch (err) {
+    console.error("Unexpected error in publicSubscribe:", err);
+    res.status(err.status || 500).json({ error: err.message || "שגיאה בשרת" });
   }
 };
 

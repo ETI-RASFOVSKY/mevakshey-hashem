@@ -45,7 +45,14 @@ exports.uploadFile = async (req, res) => {
       throw error;
     }
 
-    const { publicUrl } = supabase.storage.from(bucketName).getPublicUrl(fileName);
+    const { data: publicUrlData, error: publicUrlError } = supabase.storage.from(bucketName).getPublicUrl(fileName);
+    
+    if (publicUrlError) {
+      console.error("Error generating public URL:", publicUrlError);
+      throw publicUrlError;
+    }
+
+    const publicUrl = publicUrlData?.publicUrl;
 
     res.status(200).json({ message: 'קובץ הועלה בהצלחה', url: publicUrl });
   } catch (err) {
@@ -94,7 +101,12 @@ exports.getFiles = async (req, res) => {
       .filter(file => file.name !== '.emptyFolderPlaceholder')
       .map(file => {
         const filePath = folder ? `${folder}/${file.name}` : file.name;
-        const { publicUrl } = supabase.storage.from(bucketName).getPublicUrl(filePath);
+        const { data: publicUrlData, error: publicUrlError } = supabase.storage.from(bucketName).getPublicUrl(filePath);
+        if (publicUrlError) {
+          console.error("Error generating public URL:", publicUrlError);
+          return file;
+        }
+        const publicUrl = publicUrlData?.publicUrl;
         return {
           ...file,
           url: publicUrl, // זהו ה־URL שנשלח ללקוח

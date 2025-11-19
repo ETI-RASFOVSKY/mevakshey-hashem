@@ -1,13 +1,12 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
-import { addUser } from "../donors/DonorSlice";
 import "./FooterForm.css";
+import { API_BASE_URL } from "../../config";
 
 const FooterForm = () => {
-  const dispatch = useDispatch();
-
   const [formData, setFormData] = useState({ fname: "", Email: "" });
   const [successMessage, setSuccessMessage] = useState("");
+  const [serverError, setServerError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({ fname: "", Email: "" });
 
   const handleChange = (e) => {
@@ -15,9 +14,10 @@ const FooterForm = () => {
     setFormData({ ...formData, [name]: value });
     setErrors({ ...errors, [name]: "" });
     setSuccessMessage("");
+    setServerError("");
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     let newErrors = { fname: "", Email: "" };
     let hasError = false;
 
@@ -37,13 +37,37 @@ const FooterForm = () => {
     }
 
     setErrors({ fname: "", Email: "" });
-    dispatch(addUser({ fname: formData.fname, Email: formData.Email }));
-    setFormData({ fname: "", Email: "" });
-    setSuccessMessage("נרשמת בהצלחה");
+    setServerError("");
 
-    setTimeout(() => {
-      setSuccessMessage("");
-    }, 3000);
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/subscribe`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setServerError(data.error || "שגיאה בשליחת הפרטים");
+        return;
+      }
+
+      setFormData({ fname: "", Email: "" });
+      setSuccessMessage(data.message || "נרשמת בהצלחה");
+
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 4000);
+    } catch (err) {
+      console.error("Subscribe error:", err);
+      setServerError("שגיאה בשליחת הנתונים. נסה שוב מאוחר יותר.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -71,10 +95,16 @@ const FooterForm = () => {
           />
         </div>
         <div>
-          <button className="sendEmail" onClick={handleSend}>
-            שלח
+          <button className="sendEmail" onClick={handleSend} disabled={loading}>
+            {loading ? "שולח..." : "שלח"}
           </button>
         </div>
+
+        {serverError && (
+          <div className="errorMessage" style={{ textAlign: "center" }}>
+            {serverError}
+          </div>
+        )}
 
         {successMessage && (
           <div className="successMessage">{successMessage}</div>
