@@ -90,3 +90,6 @@ CONTACT_EMAIL=recipient@email.com
 - עם תכונות מתקדמות (סינון, מיילים)
 - מוכנה ל-production
 
+
+
+

@@ -23,7 +23,7 @@
 
 4. **חיבור ל-remote repository (אם יש):**
    ```bash
-   git remote add origin <your-repo-url>
+   git remote add origin https://github.com/ETI-RASFOVSKY/mevakshey-hashem
    git branch -M main
    git push -u origin main
    ```
@@ -37,4 +37,7 @@
 - קבצי IDE
 
 **חשוב:** ודא שקובץ `.env` לא נשמר בגיט! הוא מכיל מידע רגיש.
+
+
+
 

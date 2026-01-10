@@ -17,7 +17,7 @@ if (!process.env.JWT_SECRET) {
 }
 
 if (!process.env.ADMIN_HASH) {
-  console.warn('Warning: ADMIN_HASH not set. Admin login will not work.');
+  console.warn('Warning: ADMIN_HASH not set. Admin login will work only if admin exists in Supabase admins table.');
 }
 
 const app = express();

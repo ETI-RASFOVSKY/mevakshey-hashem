@@ -202,9 +202,31 @@ const ImageGallery = () => {
       return (
         <div key={file.name} className="image-card">
           {isVideo ? (
-            <video src={file.url} controls className="video" />
+            <video 
+              src={file.url} 
+              controls 
+              className="video"
+              preload="metadata"
+              playsInline
+              controlsList="nodownload"
+              onError={(e) => {
+                console.error('Error loading video:', file.url, e);
+                e.target.style.display = 'none';
+                e.target.nextSibling && (e.target.nextSibling.style.display = 'block');
+              }}
+            >
+              הדפדפן שלך לא תומך בתצוגת סרטונים.
+            </video>
           ) : (
-            <img src={file.url} alt={file.name} className="image" />
+            <img 
+              src={file.url} 
+              alt={file.name} 
+              className="image"
+              onError={(e) => {
+                console.error('Error loading image:', file.url);
+                e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23ddd" width="200" height="200"/%3E%3Ctext fill="%23999" font-family="sans-serif" font-size="14" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3Eתמונה לא זמינה%3C/text%3E%3C/svg%3E';
+              }}
+            />
           )}
           <div className="image-card-overlay">
             <Chip 

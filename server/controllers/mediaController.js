@@ -1,5 +1,18 @@
 const supabase = require('../services/supabaseService');
 const bucketName = 'vaad-pickters';
+const SIGNED_URL_TTL = 60 * 60 * 24 * 365; // שנה
+
+async function createSignedUrl(filePath) {
+  const { data, error } = await supabase.storage
+    .from(bucketName)
+    .createSignedUrl(filePath, SIGNED_URL_TTL);
+
+  if (error) {
+    throw error;
+  }
+
+  return data?.signedUrl;
+}
 
 // העלאת קובץ ל־bucket + folder
 exports.uploadFile = async (req, res) => {
@@ -45,14 +58,7 @@ exports.uploadFile = async (req, res) => {
       throw error;
     }
 
-    const { data: publicUrlData, error: publicUrlError } = supabase.storage.from(bucketName).getPublicUrl(fileName);
-    
-    if (publicUrlError) {
-      console.error("Error generating public URL:", publicUrlError);
-      throw publicUrlError;
-    }
-
-    const publicUrl = publicUrlData?.publicUrl;
+    const publicUrl = await createSignedUrl(fileName);
 
     res.status(200).json({ message: 'קובץ הועלה בהצלחה', url: publicUrl });
   } catch (err) {
@@ -97,21 +103,26 @@ exports.getFiles = async (req, res) => {
     }
 
     // השתמש ב־publicUrl במקום ב־path רגיל
-    const filesWithURL = data
-      .filter(file => file.name !== '.emptyFolderPlaceholder')
-      .map(file => {
-        const filePath = folder ? `${folder}/${file.name}` : file.name;
-        const { data: publicUrlData, error: publicUrlError } = supabase.storage.from(bucketName).getPublicUrl(filePath);
-        if (publicUrlError) {
-          console.error("Error generating public URL:", publicUrlError);
-          return file;
-        }
-        const publicUrl = publicUrlData?.publicUrl;
-        return {
-          ...file,
-          url: publicUrl, // זהו ה־URL שנשלח ללקוח
-        };
-      });
+    const filesWithURL = await Promise.all(
+      data
+        .filter(file => file.name !== '.emptyFolderPlaceholder')
+        .map(async (file) => {
+          const filePath = folder ? `${folder}/${file.name}` : file.name;
+          try {
+            const signedUrl = await createSignedUrl(filePath);
+            return {
+              ...file,
+              url: signedUrl,
+            };
+          } catch (err) {
+            console.error("Error generating signed URL:", err);
+            return {
+              ...file,
+              url: null,
+            };
+          }
+        })
+    );
     res.status(200).json(filesWithURL);
   } catch (err) {
     console.error("Unexpected error in getFiles:", err);

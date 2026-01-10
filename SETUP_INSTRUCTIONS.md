@@ -31,16 +31,20 @@ npm install
 # Port
 PORT=3001
 
-# Supabase
+# Supabase (Database + Storage)
+# מומלץ להשתמש ב-Service Role Key כדי לאפשר גישה לטבלאות עם RLS
 SUPABASE_URL=your_supabase_url
-SUPABASE_KEY=your_supabase_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+# (אופציונלי) אם אין Service Role Key, ישמש המפתח הרגיל:
+SUPABASE_KEY=your_supabase_anon_or_service_key
 
 # JWT Secret
 # ליצור עם: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 JWT_SECRET=your_jwt_secret_here
 
 # Admin Password Hash
-# ליצור עם: node -e "const bcrypt = require('bcrypt'); bcrypt.hash('your_password', 10).then(hash => console.log(hash))"
+# ליצור עם: node server/hash.js
+# או ישירות ב-Supabase בטבלת admins (עמודת passwordhash)
 ADMIN_HASH=your_bcrypt_hash_here
 
 # Email Configuration (Gmail)
@@ -76,9 +80,14 @@ REACT_APP_API_URL=http://localhost:3001/api
    - `fname` (text)
    - `Email` (text, unique)
    - `created_at` (timestamp, default now())
-3. צור Storage Bucket בשם `vaad-pickters`:
-   - הגדר כ-Public
+3. צור טבלה `admins` עם העמודות:
+   - `id` (uuid, primary key, auto-generate)
+   - `passwordhash` (text)
+   - `role` (text, default: 'admin')
+4. צור Storage Bucket בשם `vaad-pickters`:
+   - אפשר להשאיר כ-Private (השרת מייצר Signed URLs אוטומטית)
    - הוסף folders: `images` ו-`videos`
+   - אם ה-Bucket Private, אין צורך ב-Policies מיוחדות
 
 ## 🏃 הרצה
 
@@ -180,5 +189,6 @@ vaad/
 
 - הסינון לפי נושאים עובד לפי שם הקובץ: `category_timestamp_originalname`
 - קטגוריות זמינות: חנוכה, פורים, פסח, שבועות, ראש השנה, יום כיפור, סוכות, ל"ג בעומר, אירועים, כללי
+
 
 

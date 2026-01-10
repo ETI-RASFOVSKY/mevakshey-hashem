@@ -186,3 +186,6 @@ if (!process.env.JWT_SECRET) {
 
 מומלץ לתקן את כל הבעיות בעדיפות גבוהה לפני deployment.
 
+
+
+
